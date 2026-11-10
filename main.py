@@ -16,28 +16,16 @@ session = Session(engine)
 def read_root():
     return {"Hello": "World"}
 
-# @app.post("/products")
-# def create_product(prod : ProductRequest):
-#     # store in the database
-#     dbprod = Product(
-#         name=prod.product_name,
-#         buying_price=prod.buying_price,
-#         selling_price=prod.selling_price
-#         )
-    
-#     session.add(dbprod)
-#     session.commit()
-#     session.refresh(dbprod)
-#     return {"test" : "prod"}
-
-@app.post("/products", response_model=ProductResponse)
+@app.post("/products")
 def create_product(prod: ProductRequest):
+    # store in the database
     dbprod = Product(
-        name=prod.product_name,
+        user_id=1,  
+        product_name=prod.name,
         buying_price=prod.buying_price,
         selling_price=prod.selling_price,
     )
+
     session.add(dbprod)
     session.commit()
-    session.refresh(dbprod)
-    return dbprod
+    return {"test" : "prod"}
