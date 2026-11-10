@@ -1,14 +1,16 @@
 from pydantic import BaseModel
+from datetime import datetime
 
 class ProductRequest(BaseModel):
-    name : str
+    user_id : int
+    product_name : str
     buying_price : float
     selling_price : float
-    # stock_quantity : int
 
 class ProductResponse(BaseModel):
     id : int
-    name : str
+    user_id : int
+    product_name : str
     buying_price : float
     selling_price : float
-    # stock_quantity : int
+    created_at : datetime
