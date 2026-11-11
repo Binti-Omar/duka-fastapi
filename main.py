@@ -25,10 +25,12 @@ session = Session(engine)
 
 # add_user()
 
+# home route
 @app.get("/")
 def read_root():
     return {"FastAPI Version": "1.0"}
 
+# product routes
 @app.post("/products", response_model=ProductResponse)
 def create_product(prod: ProductRequest):
     # store in the database
@@ -50,7 +52,7 @@ def get_products():
     
     return products
 
-# Create POST and GET for all other tables except from users table.
+# sales routes
 @app.post("/sales", response_model=SaleRespone)
 def create_sales(sal: SaleRequest):
     dbsal = Sale(
@@ -69,6 +71,7 @@ def get_sales():
 
     return sales
 
+# sales_detail routes
 @app.post("/sales_detail", response_model=Sales_detailResponse)
 def create_sales_detail(sal_details: Sales_detailRequest):
     dbsal_details = Sales_detail(
@@ -88,6 +91,7 @@ def get_sales_details():
 
     return sales_details
 
+# purchase routes
 @app.post("/purchase", response_model=PurchaseResponse)
 def create_purchase(purch: PurchaseRequest):
     dbpurch = Purchase(
@@ -106,3 +110,5 @@ def get_purchases():
     purchases=session.scalars(query)
 
     return purchases
+
+# payment routes
