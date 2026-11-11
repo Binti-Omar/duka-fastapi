@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from data_schemas import ProductRequest,ProductResponse
-from models import Base,Product,User
+from data_schemas import ProductRequest,ProductResponse,SaleRequest,SaleRespone,Sales_detailRequest,Sales_detailResponse,PurchaseRequest,PurchaseResponse
+from models import Base,Product,Sale,Sales_detail,Purchase,User
 from sqlalchemy import create_engine,select
 from sqlalchemy.orm import Session
 
@@ -27,7 +27,7 @@ session = Session(engine)
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}
+    return {"FastAPI Version": "1.0"}
 
 @app.post("/products", response_model=ProductResponse)
 def create_product(prod: ProductRequest):
@@ -47,5 +47,62 @@ def create_product(prod: ProductRequest):
 def get_products():
     query = select(Product)
     products = session.scalars(query)
-
+    
     return products
+
+# Create POST and GET for all other tables except from users table.
+@app.post("/sales", response_model=SaleRespone)
+def create_sales(sal: SaleRequest):
+    dbsal = Sale(
+        product_name=sal.product_name,
+        amount=sal.amount
+    )
+
+    session.add(dbsal)
+    session.commit()
+    return dbsal
+
+@app.get("/sales", response_model=list[SaleRespone])
+def get_sales():
+    query = select(Sale)
+    sales = session.scalars(query)
+
+    return sales
+
+@app.post("/sales_detail", response_model=Sales_detailResponse)
+def create_sales_detail(sal_details: Sales_detailRequest):
+    dbsal_details = Sales_detail(
+        product_id = sal_details.product_id,
+        sales_id = sal_details.sales_id,
+        quantity = sal_details.quantity
+    )
+
+    session.add(dbsal_details)
+    session.commit()
+    return dbsal_details
+
+@app.get("/sales_details", response_model=list[Sales_detailResponse])
+def get_sales_details():
+    query=select(Sales_detail)
+    sales_details=session.scalars(query)
+
+    return sales_details
+
+@app.post("/purchase", response_model=PurchaseResponse)
+def create_purchase(purch: PurchaseRequest):
+    dbpurch = Purchase(
+        product_id = purch.product_id,
+        buying_price = purch.buying_price,
+        quantity = purch.quantity
+    )
+
+    session.add(dbpurch)
+    session.commit()
+    return dbpurch
+
+@app.get("/purchase", response_model=list[PurchaseResponse])
+def get_purchases():
+    query=select(Purchase)
+    purchases=session.scalars(query)
+
+    return purchases
