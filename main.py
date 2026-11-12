@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from data_schemas import ProductRequest,ProductResponse,SaleRequest,SaleRespone,Sales_detailRequest,Sales_detailResponse,PurchaseRequest,PurchaseResponse
-from models import Base,Product,Sale,Sales_detail,Purchase,User
+from data_schemas import ProductRequest,ProductResponse,SaleRequest,SaleRespone,Sales_detailRequest,Sales_detailResponse,PurchaseRequest,PurchaseResponse,PaymentRequest,PaymentResponse
+from models import Base,Product,Sale,Sales_detail,Purchase,User,Payment
 from sqlalchemy import create_engine,select
 from sqlalchemy.orm import Session
 
@@ -112,3 +112,25 @@ def get_purchases():
     return purchases
 
 # payment routes
+@app.post("/payment", response_model=PaymentResponse)
+def create_payment(pay: PaymentRequest):
+    dbpay = Payment(
+        sales_id = pay.sales_id,
+        amount = pay.amount,
+        transaction_code = pay.transaction_code,
+        mrid = pay.mrid,
+        crid = pay.crid,
+        payment_status = pay.payment_status,
+        phone_number = pay.phone_number
+    )
+
+    session.add(dbpay)
+    session.commit()
+    return dbpay
+
+@app.get("/payment", response_model=list[PaymentResponse])
+def get_payment():
+    query=select(Payment)
+    payments=session.scalars(query)
+
+    return payments
