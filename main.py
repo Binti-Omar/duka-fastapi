@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI,HTTPException
 from data_schemas import ProductRequest,ProductResponse,SaleRequest,SaleRespone,Sales_detailRequest,Sales_detailResponse,PurchaseRequest,PurchaseResponse,PaymentRequest,PaymentResponse
 from models import Base,Product,Sale,Sales_detail,Purchase,User,Payment
 from sqlalchemy import create_engine,select
@@ -29,6 +29,7 @@ session = Session(engine)
 @app.get("/")
 def read_root():
     return {"FastAPI Version": "1.0"}
+#End of home route
 
 # product routes
 @app.post("/products", response_model=ProductResponse)
@@ -47,10 +48,46 @@ def create_product(prod: ProductRequest):
 
 @app.get("/products", response_model=list[ProductResponse])
 def get_products():
+    # getting data from database
     query = select(Product)
     products = session.scalars(query)
     
     return products
+
+@app.get("/products/{product_id}", response_model=ProductResponse)
+def get_single_product(product_id : int):
+    query = select(Product).where(Product.id == product_id)
+    products = session.scalars(query).first()
+    
+    if products is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Product not found"
+            )
+
+    return products
+
+# path parameter(the one in curly braces) is useful when writing a query
+@app.put("/products/{product_id}", response_model=ProductResponse)
+def update_product(prod : ProductRequest,product_id : int):
+    query = select(Product).where(Product.id == product_id)
+    products = session.scalars(query).first()
+
+    if products is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Product not found"
+        )
+    
+    products.product_name = prod.product_name
+    products.buying_price = prod.buying_price
+    products.selling_price = prod.selling_price
+
+    # session.add(dbprod)
+    session.commit()
+    
+    return products
+# End of product routes
 
 # sales routes
 @app.post("/sales", response_model=SaleRespone)
@@ -71,6 +108,9 @@ def get_sales():
 
     return sales
 
+@app.put("/sales/{}")
+# End of sales routes
+
 # sales_detail routes
 @app.post("/sales_detail", response_model=Sales_detailResponse)
 def create_sales_detail(sal_details: Sales_detailRequest):
@@ -90,6 +130,7 @@ def get_sales_details():
     sales_details=session.scalars(query)
 
     return sales_details
+# End of sales_detail routes
 
 # purchase routes
 @app.post("/purchase", response_model=PurchaseResponse)
@@ -110,6 +151,7 @@ def get_purchases():
     purchases=session.scalars(query)
 
     return purchases
+# End of purchase routes
 
 # payment routes
 @app.post("/payment", response_model=PaymentResponse)
@@ -134,3 +176,4 @@ def get_payment():
     payments=session.scalars(query)
 
     return payments
+# End of payment routes
