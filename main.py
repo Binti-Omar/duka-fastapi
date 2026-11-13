@@ -212,6 +212,38 @@ def get_purchases():
     purchases=session.scalars(query)
 
     return purchases
+
+@app.get("/purchase/{purchase_id}", response_model=PurchaseResponse)
+def get_single_purchase(purchase_id : int):
+    query = select(Purchase).where(Purchase.id == purchase_id)
+    purchase = session.scalars(query).first()
+
+    if purchase is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Purchase not found"
+        )
+
+    return purchase
+
+@app.put("/purchase/{purchase_id}", response_model=PurchaseResponse)
+def update_purchase(purch : PurchaseRequest, purchase_id : int):
+    query = select(Purchase).where(Purchase.id == purchase_id)
+    purchase = session.scalars(query).first()
+
+    if purchase is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Purchase not found"
+        )
+
+    purchase.product_id = purch.product_id
+    purchase.buying_price = purch.buying_price
+    purchase.quantity = purch.quantity
+
+    session.commit()
+
+    return purchase
 # End of purchase routes
 
 # payment routes
@@ -237,6 +269,41 @@ def get_payment():
     payments=session.scalars(query)
 
     return payments
+
+@app.get("/payment/{payment_id}", response_model=PaymentResponse)
+def get_single_paymnet(payment_id : int):
+    query = select(Payment).where(Payment.id == payment_id)
+    payment = session.scalars(query).first()
+    
+    if payment is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Payment not found"
+        )
+
+    return payment
+
+@app.put("/payment/{payment_id}", response_model=PaymentResponse)
+def update_payment(pay : PaymentRequest, payment_id : int):
+    query = select(Payment).where(Payment.id == payment_id)
+    payment = session.scalars(query).first()
+    
+    if payment is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Payment not found"
+        )
+
+    payment.sales_id = pay.sales_id
+    payment.amount = pay.amount
+    payment.transaction_code = pay.transaction_code
+    payment.mrid = pay.mrid
+    payment.crid = pay.crid
+    payment.payment_status = pay.payment_status
+    payment.phone_number = pay.phone_number
+
+    session.commit()
+
+    return payment
 # End of payment routes
 
-# Task: Do UPDATE and FETCH SINGLE PRODUCT for all other models/routes
