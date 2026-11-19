@@ -78,14 +78,15 @@ class RegisterRequest(BaseModel):
     full_name : str
     email : str
     password : str
-    phone_number : int
+    phone_number : str
 
 class RegisterResponse(BaseModel):
     id : int
     full_name : str
     email : str
     password : str
-    phone_number : int
+    phone_number : str
+    token : str 
 
 class LoginRequest(BaseModel):
     email : str
@@ -95,6 +96,7 @@ class LoginResponse(BaseModel):
     id : int
     email : str
     password : str
+    token : str 
     
 
 
