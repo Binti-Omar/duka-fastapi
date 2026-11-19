@@ -1,5 +1,5 @@
 from fastapi import FastAPI,HTTPException
-from data_schemas import ProductRequest,ProductResponse,SaleRequest,SaleRespone,Sales_detailRequest,Sales_detailResponse,PurchaseRequest,PurchaseResponse,PaymentRequest,PaymentResponse
+from data_schemas import ProductRequest,ProductResponse,SaleRequest,SaleRespone,Sales_detailRequest,Sales_detailResponse,PurchaseRequest,PurchaseResponse,PaymentRequest,PaymentResponse,RegisterRequest,RegisterResponse,LoginRequest,LoginResponse
 from models import Base,Product,Sale,Sales_detail,Purchase,User,Payment
 from sqlalchemy import create_engine,select
 from sqlalchemy.orm import Session
@@ -306,4 +306,21 @@ def update_payment(pay : PaymentRequest, payment_id : int):
 
     return payment
 # End of payment routes
+
+# Register route
+@app.post("/register", response_model=RegisterResponse)
+def register_user(reg: RegisterRequest):
+    dbreg = User(
+        full_name=reg.full_name,
+        email=reg.email,
+        password=reg.password
+    )
+
+    session.add(dbreg)
+    session.commit()
+    return dbreg
+
+
+
+
 

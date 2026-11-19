@@ -74,5 +74,27 @@ class PaymentResponse(BaseModel):
     phone_number: int
     payment_date: datetime
 
+class RegisterRequest(BaseModel):
+    full_name : str
+    email : str
+    password : str
+    phone_number : int
+
+class RegisterResponse(BaseModel):
+    id : int
+    full_name : str
+    email : str
+    password : str
+    phone_number : int
+
+class LoginRequest(BaseModel):
+    email : str
+    password : str
+
+class LoginResponse(BaseModel):
+    id : int
+    email : str
+    password : str
+    
 
 
