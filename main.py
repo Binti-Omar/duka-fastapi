@@ -4,7 +4,7 @@ from models import Base,Product,Sale,Sales_detail,Purchase,User,Payment
 from sqlalchemy import create_engine,select
 from sqlalchemy.orm import Session
 from myjwt import verify_password,create_access_token,get_password_hash,get_current_user
-
+from mpesa import make_stk_push
 app = FastAPI()
 
 engine = create_engine("sqlite:///./fastduka_api.db", echo=True)
@@ -351,4 +351,51 @@ def update_payment(pay : PaymentRequest, payment_id : int):
 
     return payment
 # End of payment routes
+
+# stk-push route
+# @app.post("/stk_push", response_model=PaymentResponse)
+# def make_stk_push(pay : PaymentRequest):
+#     dbpush = Payment(
+#         sales_id = pay.sales_id,
+#         amount = pay.amount,
+#         transaction_code = pay.transaction_code,
+#         mrid = pay.mrid,
+#         crid = pay.crid,
+#         payment_status = pay.payment_status,
+#         phone_number = pay.phone_number
+#     )
+    
+#     session.add(dbpush)
+#     session.commit()
+#     return dbpush
+
+
+@app.post("/stk_push", response_model=PaymentResponse)
+def stk_push(payload: PaymentRequest):
+    try:
+        response = make_stk_push({
+            "sales_id": payload.sales_id,
+            "amount": payload.amount,
+            "phone_number": payload.phone_number,
+        })
+
+        new_payment = Payment(
+            sales_id=payload.sales_id,
+            amount=payload.amount,
+            phone_number=payload.phone_number,
+            mrid=response.get("MerchantRequestID"),
+            crid=response.get("CheckoutRequestID"),
+            transaction_code=None,
+            payment_status="pending",
+        )
+
+        session.add(new_payment)
+        session.commit()
+
+        return new_payment
+
+    except Exception as e:
+        session.rollback()
+        print(f"stk push error: {e}")
+        raise HTTPException(status_code=500, detail="STK push failed")
 

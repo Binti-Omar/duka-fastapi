@@ -43,7 +43,8 @@ def make_stk_push(payload):
     # print(payload)
     # Getting amount,phone number and the sale ID
     amount = payload['amount']
-    phone_number = payload['phone_number']
+    # phone_number = payload['phone_number']
+    phone_number = payload['phone_number'].replace("+", "")
     # The .get() is useful because if sale_id doesn't exist, Python returns none not a keyerror
     sales_id = payload.get('sales_id')  
 
@@ -74,7 +75,7 @@ def make_stk_push(payload):
         # CallBackURL is the address Safaricom uses to report the result of the payment.
         "CallBackURL": my_callback_url,
         # This connects the M-Pesa payment to your sale.
-        "AccountReference": str(payload.get('sale_id')),
+        "AccountReference": str(payload.get('sales_id')),
         "TransactionDesc": "description of the transaction",
     }
 

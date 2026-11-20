@@ -54,24 +54,41 @@ class PurchaseResponse(BaseModel):
     buying_price : float
     purchase_date : datetime
 
+# class PaymentRequest(BaseModel):
+#     sales_id : int
+#     amount : float
+#     transaction_code: str
+#     mrid: str
+#     crid: str
+#     payment_status : str
+#     phone_number: str
+
+# class PaymentResponse(BaseModel):
+#     id : int
+#     sales_id : int
+#     amount : float
+#     transaction_code: str
+#     mrid: str
+#     crid: str
+#     payment_status : str
+#     phone_number: str
+#     payment_date: datetime
+
+
 class PaymentRequest(BaseModel):
-    sales_id : int
-    amount : float
-    transaction_code: str
-    mrid: str
-    crid: str
-    payment_status : str
-    phone_number: int
+    sales_id: int
+    amount: float
+    phone_number: str
 
 class PaymentResponse(BaseModel):
-    id : int
-    sales_id : int
-    amount : float
-    transaction_code: str
-    mrid: str
-    crid: str
-    payment_status : str
-    phone_number: int
+    id: int
+    sales_id: int
+    amount: float
+    transaction_code: str | None
+    mrid: str | None
+    crid: str | None
+    payment_status: str
+    phone_number: str
     payment_date: datetime
 
 class RegisterRequest(BaseModel):
