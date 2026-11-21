@@ -1,10 +1,12 @@
 from fastapi import FastAPI,HTTPException,status,Depends
-from data_schemas import ProductRequest,ProductResponse,SaleRequest,SaleRespone,Sales_detailRequest,Sales_detailResponse,PurchaseRequest,PurchaseResponse,PaymentRequest,PaymentResponse,RegisterRequest,RegisterResponse,LoginRequest,LoginResponse
+from data_schemas import ProductRequest,ProductResponse,SaleRequest,SaleRespone,Sales_detailRequest,Sales_detailResponse,PurchaseRequest,PurchaseResponse,PaymentRequest,PaymentResponse,RegisterRequest,RegisterResponse,LoginRequest,LoginResponse,CallbackResponse
 from models import Base,Product,Sale,Sales_detail,Purchase,User,Payment
 from sqlalchemy import create_engine,select
 from sqlalchemy.orm import Session
 from myjwt import verify_password,create_access_token,get_password_hash,get_current_user
 from mpesa import make_stk_push
+from generate_receipts import create_pdf
+
 app = FastAPI()
 
 engine = create_engine("sqlite:///./fastduka_api.db", echo=True)
@@ -395,7 +397,54 @@ def stk_push(payload: PaymentRequest):
         return new_payment
 
     except Exception as e:
+        # session.rollback() cancels any database changes that haven’t been committed
         session.rollback()
         print(f"stk push error: {e}")
         raise HTTPException(status_code=500, detail="STK push failed")
 
+@app.post("/saf-callback", response_model=CallbackResponse)
+def saf_callback(payload: dict):
+    try:
+        body = payload.get("Body", {})
+        stk_callback = body.get("stkCallback", {})
+
+        result_code = stk_callback.get("ResultCode")
+        mrid = stk_callback.get("MerchantRequestID")
+        crid = stk_callback.get("CheckoutRequestID")
+
+        payment = session.scalars(
+            select(Payment).where(
+                Payment.mrid == mrid,
+                Payment.crid == crid,
+            )
+        ).first()
+
+        if payment:
+            if result_code == 0:
+                callback_metadata = (
+                    stk_callback.get("CallbackMetadata", {}).get("Item", [])
+                )
+
+                for item in callback_metadata:
+                    if item.get("Name") == "MpesaReceiptNumber":
+                        payment.transaction_code = item.get("Value")
+
+                payment.payment_status = "complete"
+
+                session.commit()
+
+                text = (
+                    f"Trans Code: {payment.transaction_code}, "
+                    f"Amount: {payment.amount}, "
+                    f"Date: {payment.payment_date}"
+                )
+                create_pdf(text, payment.transaction_code)
+            else:
+                payment.payment_status = "failed"
+                session.commit()
+
+    except Exception as e:
+        print(f"Error for callback: {e}")
+        session.rollback()
+
+    return {"message": "callback received"}

@@ -115,5 +115,6 @@ class LoginResponse(BaseModel):
     password : str
     token : str 
     
-
+class CallbackResponse(BaseModel):
+    message: str
 
