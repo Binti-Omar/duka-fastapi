@@ -1,4 +1,5 @@
 from fastapi import FastAPI,HTTPException,status,Depends
+from fastapi.middleware.cors import CORSMiddleware
 from data_schemas import ProductRequest,ProductResponse,SaleRequest,SaleRespone,Sales_detailRequest,Sales_detailResponse,PurchaseRequest,PurchaseResponse,PaymentRequest,PaymentResponse,RegisterRequest,RegisterResponse,LoginRequest,LoginResponse,CallbackResponse
 from models import Base,Product,Sale,Sales_detail,Purchase,User,Payment
 from sqlalchemy import create_engine,select
@@ -8,6 +9,20 @@ from mpesa import make_stk_push
 from generate_receipts import create_pdf
 
 app = FastAPI()
+
+origins = [
+    "http://localhost",
+    "http://localhost:5500",
+    "http://127.0.0.1:5501"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 engine = create_engine("sqlite:///./fastduka_api.db", echo=True)
 
